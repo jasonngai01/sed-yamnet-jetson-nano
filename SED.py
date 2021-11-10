@@ -10,7 +10,7 @@ import yamnet as yamnet_model
 params = yamnet_params.Params()
 yamnet = yamnet_model.yamnet_frames_model(params)
 yamnet.load_weights('yamnet.h5')
-yamnet_classes = yamnet_model.class_names('yamnet_class_map_zh-tw.csv')
+yamnet_classes = yamnet_model.class_names('yamnet_class_map.csv')
 
 import os, pyaudio, time
 #os.system('jack_control start')
@@ -49,7 +49,9 @@ with open('sed.npy', 'ab') as f:
             wav_data = np.frombuffer(b''.join(CHUNKs), dtype=np.int16)
             waveform = wav_data / tf.int16.max#32768.0
             waveform = waveform.astype('float32')
+
             scores, embeddings, spectrogram = yamnet(waveform)
+
             prediction = np.mean(scores[:-1], axis=0) # last one scores comes from insufficient samples
             # assert (prediction==scores[0]).numpy().all() # only one scores at RECORD_SECONDS = 1.024
             assert len(scores[:-1]) == CHUNK * len(CHUNKs) / RATE // 0.48 - 1 # hop 0.48 seconds
